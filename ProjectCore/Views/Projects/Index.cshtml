@@ -9,32 +9,29 @@
 
 <table class="table table-bordered">
     <tr>
-
+        <td>Tasks</td>
         <td>
             @Html.DisplayNameFor(model => model.Title)
-
         </td>
-
         <td>
             @Html.DisplayNameFor(model => model.Details)
-
         </td>
         <td>
             @Html.DisplayNameFor(model => model.ExpectedCompletionDate)
-
         </td>
         <td>
             @Html.DisplayNameFor(model => model.CreatedAt)
-
         </td>
         <td>
             @Html.DisplayNameFor(model => model.UpdateAt)
-
         </td>
     </tr>
     @foreach (var item in Model)
     {
 <tr>
+    <td>
+        @Html.ActionLink(" ", "Index", "Tasks", new { projectId = item.Id }, new { @class = "btn btn-primary btn-sm fas fa-edit" })
+    </td>
     <td>
         @Html.DisplayFor(modelItem => item.Title)
     </td>

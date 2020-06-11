@@ -15,6 +15,7 @@ namespace ProjectCore.DAL.Models
         {
         }
 
+        public virtual DbSet<Activities> Activities { get; set; }
         public virtual DbSet<Artifacts> Artifacts { get; set; }
         public virtual DbSet<AspNetRoleClaims> AspNetRoleClaims { get; set; }
         public virtual DbSet<AspNetRoles> AspNetRoles { get; set; }
@@ -24,7 +25,10 @@ namespace ProjectCore.DAL.Models
         public virtual DbSet<AspNetUsers> AspNetUsers { get; set; }
         public virtual DbSet<AspNetUserTokens> AspNetUserTokens { get; set; }
         public virtual DbSet<Members> Members { get; set; }
+        public virtual DbSet<Priorities> Priorities { get; set; }
         public virtual DbSet<Projects> Projects { get; set; }
+        public virtual DbSet<States> States { get; set; }
+        public virtual DbSet<Tasks> Tasks { get; set; }
         public virtual DbSet<Tenants> Tenants { get; set; }
         public virtual DbSet<UserProjects> UserProjects { get; set; }
 
@@ -39,6 +43,13 @@ namespace ProjectCore.DAL.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Activities>(entity =>
+            {
+                entity.Property(e => e.Name)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+            });
+
             modelBuilder.Entity<Artifacts>(entity =>
             {
                 entity.Property(e => e.CreatedAt).HasColumnType("datetime");
@@ -61,9 +72,9 @@ namespace ProjectCore.DAL.Models
 
             modelBuilder.Entity<AspNetRoleClaims>(entity =>
             {
-                entity.HasIndex(e => e.RoleId);
-
-                entity.Property(e => e.RoleId).IsRequired();
+                entity.Property(e => e.RoleId)
+                    .IsRequired()
+                    .HasMaxLength(450);
 
                 entity.HasOne(d => d.Role)
                     .WithMany(p => p.AspNetRoleClaims)
@@ -72,11 +83,6 @@ namespace ProjectCore.DAL.Models
 
             modelBuilder.Entity<AspNetRoles>(entity =>
             {
-                entity.HasIndex(e => e.NormalizedName)
-                    .HasName("RoleNameIndex")
-                    .IsUnique()
-                    .HasFilter("([NormalizedName] IS NOT NULL)");
-
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
                 entity.Property(e => e.Name).HasMaxLength(256);
@@ -86,9 +92,9 @@ namespace ProjectCore.DAL.Models
 
             modelBuilder.Entity<AspNetUserClaims>(entity =>
             {
-                entity.HasIndex(e => e.UserId);
-
-                entity.Property(e => e.UserId).IsRequired();
+                entity.Property(e => e.UserId)
+                    .IsRequired()
+                    .HasMaxLength(450);
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.AspNetUserClaims)
@@ -99,13 +105,13 @@ namespace ProjectCore.DAL.Models
             {
                 entity.HasKey(e => new { e.LoginProvider, e.ProviderKey });
 
-                entity.HasIndex(e => e.UserId);
-
                 entity.Property(e => e.LoginProvider).HasMaxLength(128);
 
                 entity.Property(e => e.ProviderKey).HasMaxLength(128);
 
-                entity.Property(e => e.UserId).IsRequired();
+                entity.Property(e => e.UserId)
+                    .IsRequired()
+                    .HasMaxLength(450);
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.AspNetUserLogins)
@@ -115,8 +121,6 @@ namespace ProjectCore.DAL.Models
             modelBuilder.Entity<AspNetUserRoles>(entity =>
             {
                 entity.HasKey(e => new { e.UserId, e.RoleId });
-
-                entity.HasIndex(e => e.RoleId);
 
                 entity.HasOne(d => d.Role)
                     .WithMany(p => p.AspNetUserRoles)
@@ -129,14 +133,6 @@ namespace ProjectCore.DAL.Models
 
             modelBuilder.Entity<AspNetUsers>(entity =>
             {
-                entity.HasIndex(e => e.NormalizedEmail)
-                    .HasName("EmailIndex");
-
-                entity.HasIndex(e => e.NormalizedUserName)
-                    .HasName("UserNameIndex")
-                    .IsUnique()
-                    .HasFilter("([NormalizedUserName] IS NOT NULL)");
-
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
                 entity.Property(e => e.Email).HasMaxLength(256);
@@ -153,7 +149,7 @@ namespace ProjectCore.DAL.Models
                     .WithMany(p => p.AspNetUsers)
                     .HasForeignKey(d => d.TenantId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__AspNetUse__Tenan__5CD6CB2B");
+                    .HasConstraintName("FK__AspNetUse__Tenan__534D60F1");
             });
 
             modelBuilder.Entity<AspNetUserTokens>(entity =>
@@ -188,7 +184,14 @@ namespace ProjectCore.DAL.Models
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.Members)
                     .HasForeignKey(d => d.UserId)
-                    .HasConstraintName("FK__Members__UserId__5BE2A6F2");
+                    .HasConstraintName("FK__Members__UserId__5629CD9C");
+            });
+
+            modelBuilder.Entity<Priorities>(entity =>
+            {
+                entity.Property(e => e.Name)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
             });
 
             modelBuilder.Entity<Projects>(entity =>
@@ -211,6 +214,46 @@ namespace ProjectCore.DAL.Models
                     .WithMany(p => p.Projects)
                     .HasForeignKey(d => d.TenantId)
                     .HasConstraintName("FK_Projects_Tenants");
+            });
+
+            modelBuilder.Entity<States>(entity =>
+            {
+                entity.Property(e => e.Name)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+            });
+
+            modelBuilder.Entity<Tasks>(entity =>
+            {
+                entity.Property(e => e.Details)
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ExpirationDate).HasColumnType("datetime");
+
+                entity.Property(e => e.Title)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.HasOne(d => d.Activity)
+                    .WithMany(p => p.Tasks)
+                    .HasForeignKey(d => d.ActivityId)
+                    .HasConstraintName("FK_Tasks_Activities");
+
+                entity.HasOne(d => d.Priority)
+                    .WithMany(p => p.Tasks)
+                    .HasForeignKey(d => d.PriorityId)
+                    .HasConstraintName("FK_Tasks_Priorities");
+
+                entity.HasOne(d => d.Project)
+                    .WithMany(p => p.Tasks)
+                    .HasForeignKey(d => d.ProjectId)
+                    .HasConstraintName("FK_Tasks_Projects");
+
+                entity.HasOne(d => d.State)
+                    .WithMany(p => p.Tasks)
+                    .HasForeignKey(d => d.StateId)
+                    .HasConstraintName("FK_Tasks_States");
             });
 
             modelBuilder.Entity<Tenants>(entity =>
@@ -244,7 +287,7 @@ namespace ProjectCore.DAL.Models
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.UserProjects)
                     .HasForeignKey(d => d.UserId)
-                    .HasConstraintName("FK__UserProje__UserI__5AEE82B9");
+                    .HasConstraintName("FK__UserProje__UserI__59063A47");
             });
         }
     }
