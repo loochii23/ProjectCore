@@ -44,6 +44,8 @@
                     if (User.IsInRole("Admin"))
                     {
                         @Html.ActionLink(" Activities", "Index", "Activities", null, new { @class = "list-group-item list-group-item-action bg-light fas fa-tasks" })
+                        @Html.ActionLink(" Priorities", "Index", "Priorities", null, new { @class = "list-group-item list-group-item-action bg-light fas fa-search" })
+                        @Html.ActionLink(" States", "Index", "States", null, new { @class = "list-group-item list-group-item-action bg-light fas fa-star" })
                     }
 
                 }
